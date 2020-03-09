@@ -5,29 +5,42 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 public class GeekBrainsRPGGame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	
+	private SpriteBatch batch;
+	private Texture textureGrass;
+	private Hero hero;
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		hero = new Hero();
+		textureGrass = new Texture("grass.png");
 	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		float dt = Gdx.graphics.getDeltaTime();
+		update(dt);
+		Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		batch.draw(img, 0, 0);
+		for (int i = 0; i < 16; i++) {
+			for (int j = 0; j < 9; j++) {
+				batch.draw(textureGrass, i * 80, j * 80);
+			}
+		}
+		hero.render(batch);
 		batch.end();
 	}
-	
+
+	public void update(float dt){
+		hero.update(dt);
+	}
+
 	@Override
 	public void dispose () {
 		batch.dispose();
-		img.dispose();
 	}
 }
