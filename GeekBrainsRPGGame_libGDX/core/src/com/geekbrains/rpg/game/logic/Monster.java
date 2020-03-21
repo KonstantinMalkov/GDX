@@ -2,6 +2,7 @@ package com.geekbrains.rpg.game.logic;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.geekbrains.rpg.game.logic.utils.Poolable;
 import com.geekbrains.rpg.game.screens.utils.Assets;
@@ -14,12 +15,15 @@ public class Monster extends GameCharacter implements Poolable {
 
     public Monster(GameController gc) {
         super(gc, 20, 100.0f);
-        this.texture = Assets.getInstance().getAtlas().findRegion("knight");
+        this.textures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("dwarf")).split(60, 60);
         this.changePosition(800.0f, 300.0f);
         this.dst.set(this.position);
         this.visionRadius = 160.0f;
-        this.type = Type.RANGED;
-        this.attackRadius = 150.0f;
+        if (MathUtils.random(100) < 30) {
+            this.weapon = Weapon.createSimpleRangedWeapon();
+        } else {
+            this.weapon = Weapon.createSimpleMeleeWeapon();
+        }
     }
 
     public void generateMe() {
@@ -33,14 +37,25 @@ public class Monster extends GameCharacter implements Poolable {
     @Override
     public void onDeath() {
         super.onDeath();
+        gc.getWeaponsController().setup(position.x, position.y);
     }
 
     @Override
     public void render(SpriteBatch batch, BitmapFont font) {
-        batch.setColor(0.5f, 0.5f, 0.5f, 0.7f);
-        batch.draw(texture, position.x - 30, position.y - 30, 30, 30, 60, 60, 1, 1, 0);
-        batch.setColor(1, 1, 1, 1);
-        batch.draw(textureHp, position.x - 30, position.y + 30, 60 * ((float) hp / hpMax), 12);
+        TextureRegion currentRegion = textures[0][getCurrentFrameIndex()];
+        if (dst.x > position.x) {
+            if (currentRegion.isFlipX()) {
+                currentRegion.flip(true, false);
+            }
+        } else {
+            if (!currentRegion.isFlipX()) {
+                currentRegion.flip(true, false);
+            }
+        }
+        batch.draw(currentRegion, position.x - 30, position.y - 30, 30, 30, 60, 60, 2, 2, 0);
+        if (hp < hpMax) {
+            batch.draw(textureHp, position.x - 30, position.y + 30, 60 * ((float) hp / hpMax), 12);
+        }
     }
 
     public void update(float dt) {
