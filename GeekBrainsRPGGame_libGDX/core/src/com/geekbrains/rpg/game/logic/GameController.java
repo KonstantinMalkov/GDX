@@ -10,6 +10,7 @@ public class GameController {
     private ProjectilesController projectilesController;
     private MonstersController monstersController;
     private WeaponsController weaponsController;
+    private UsefullThingsController usefullThingsController;
     private List<GameCharacter> allCharacters;
     private Map map;
     private Hero hero;
@@ -39,10 +40,15 @@ public class GameController {
         return weaponsController;
     }
 
+    public UsefullThingsController getUsefullThingsController() {
+        return usefullThingsController;
+    }
+
     public GameController() {
         this.allCharacters = new ArrayList<>();
         this.projectilesController = new ProjectilesController();
         this.weaponsController = new WeaponsController(this);
+        this.usefullThingsController = new UsefullThingsController(this);
         this.hero = new Hero(this);
         this.map = new Map();
         this.monstersController = new MonstersController(this, 5);
@@ -60,6 +66,7 @@ public class GameController {
         checkCollisions();
         projectilesController.update(dt);
         weaponsController.update(dt);
+        usefullThingsController.update(dt);
     }
 
     public void collideUnits(GameCharacter u1, GameCharacter u2) {
@@ -96,7 +103,7 @@ public class GameController {
         for (int i = 0; i < weaponsController.getActiveList().size(); i++) {
             Weapon w = weaponsController.getActiveList().get(i);
             if (hero.getPosition().dst(w.getPosition()) < 20) {
-                w.consume(hero);
+                w.consume(hero);//подобрали оружие
             }
         }
 

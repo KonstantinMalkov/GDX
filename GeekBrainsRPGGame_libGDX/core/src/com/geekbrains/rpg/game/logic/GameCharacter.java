@@ -176,4 +176,13 @@ public abstract class GameCharacter implements MapElement {
             }
         }
     }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getHpMax() {
+        return hpMax;
+    }
 }
+
