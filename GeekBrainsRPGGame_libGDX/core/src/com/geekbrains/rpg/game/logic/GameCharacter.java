@@ -51,6 +51,18 @@ public abstract class GameCharacter implements MapElement {
 
     public void changePosition(float x, float y) {
         position.set(x, y);
+        if (position.x < 0.1f){
+            position.x = 0.1f;
+        }
+        if (position.y - 20 < 0.1f){
+            position.y = 20.1f;
+        }
+        if (position.x > Map.MAP_CELLS_WIDTH * 80 - 1){
+            position.x = Map.MAP_CELLS_WIDTH * 80 - 1;
+        }
+        if (position.y - 20 > Map.MAP_CELLS_HEIGHT * 80 - 1){
+            position.y = Map.MAP_CELLS_HEIGHT * 80 - 1 + 20;
+        }
         area.setPosition(x, y - 20);
     }
 
@@ -106,26 +118,23 @@ public abstract class GameCharacter implements MapElement {
                 }
             }
         }
-        area.setPosition(position.x, position.y - 20);
     }
 
     public void moveToDst(float dt) {
         tmp.set(dst).sub(position).nor().scl(speed);
         tmp2.set(position);
         if (position.dst(dst) > speed * dt) {
-            position.mulAdd(tmp, dt);
+            changePosition(position.x + tmp.x * dt, position.y + tmp.y * dt);
         } else {
-            position.set(dst);
+            changePosition(dst);
             state = State.IDLE;
         }
         if (!gc.getMap().isGroundPassable(getCellX(), getCellY())) {
-            position.set(tmp2);
-            position.add(tmp.x * dt, 0);
+            changePosition(tmp2.x + tmp.x * dt, tmp.y);
             if (!gc.getMap().isGroundPassable(getCellX(), getCellY())) {
-                position.set(tmp2);
-                position.add(0, tmp.y * dt);
+                changePosition(tmp2.x, tmp2.y + tmp.y * dt);
                 if (!gc.getMap().isGroundPassable(getCellX(), getCellY())) {
-                    position.set(tmp2);
+                    changePosition(tmp2);
                 }
             }
         }

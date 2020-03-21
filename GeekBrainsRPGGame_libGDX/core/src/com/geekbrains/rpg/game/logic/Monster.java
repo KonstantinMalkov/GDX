@@ -3,7 +3,9 @@ package com.geekbrains.rpg.game.logic;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.geekbrains.rpg.game.logic.utils.Poolable;
+import com.geekbrains.rpg.game.screens.ScreenManager;
 import com.geekbrains.rpg.game.screens.utils.Assets;
 
 public class Monster extends GameCharacter implements Poolable {
@@ -24,8 +26,8 @@ public class Monster extends GameCharacter implements Poolable {
 
     public void generateMe() {
         do {
-            changePosition(MathUtils.random(0, 1280), MathUtils.random(0, 720));
-        } while (!gc.getMap().isGroundPassable(position));
+            changePosition(MathUtils.random(0, ScreenManager.WORLD_WIDTH - 1), MathUtils.random(0, ScreenManager.WORLD_HEIGHT - 1));
+        } while (!gc.getMap().isGroundPassable((int)(position.x / 80), (int)(position.y / 80)));
         hpMax = 20;
         hp = hpMax;
     }
@@ -40,7 +42,9 @@ public class Monster extends GameCharacter implements Poolable {
         batch.setColor(0.5f, 0.5f, 0.5f, 0.7f);
         batch.draw(texture, position.x - 30, position.y - 30, 30, 30, 60, 60, 1, 1, 0);
         batch.setColor(1, 1, 1, 1);
-        batch.draw(textureHp, position.x - 30, position.y + 30, 60 * ((float) hp / hpMax), 12);
+        if(hp < hpMax) {
+            batch.draw(textureHp, position.x - 30, position.y + 30, 60 * ((float) hp / hpMax), 12);
+        }
     }
 
     public void update(float dt) {
