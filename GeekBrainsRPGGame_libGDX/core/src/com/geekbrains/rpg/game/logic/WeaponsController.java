@@ -1,41 +1,81 @@
 package com.geekbrains.rpg.game.logic;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.geekbrains.rpg.game.logic.utils.ObjectPool;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class WeaponsController extends ObjectPool<Weapon> {
     private GameController gc;
+    private List<Weapon> prototypes;
 
     @Override
     protected Weapon newObject() {
-        return new Weapon();
+        return new Weapon(gc);
     }
 
     public WeaponsController(GameController gc) {
         this.gc = gc;
+        this.loadPrototypes();
     }
 
     public void setup(float x, float y) {
-        Weapon w = getActiveElement();
-        int maxDamage = MathUtils.random(3, 4);
-        for (int i = 0; i < 10; i++) {
-            if (MathUtils.random(100) < 50 - i * 5) {
-                maxDamage++;
+        Weapon out = getActiveElement();
+        out.copyFrom(prototypes.get(MathUtils.random(0, prototypes.size() - 1)));
+        forge(out);
+        out.setPosition(x, y);
+        out.activate();
+    }
+
+    public Weapon getOneFromAnyPrototype() {
+        Weapon out = new Weapon(gc);
+        out.copyFrom(prototypes.get(MathUtils.random(0, prototypes.size() - 1)));
+        forge(out);
+        return out;
+    }
+
+    public void forge(Weapon w) {
+        for (int i = 0; i < 30; i++) {
+            if (MathUtils.random(100) < 5) {
+                w.setMinDamage(w.getMinDamage() + 1);
             }
         }
-        Weapon.Type type = Weapon.Type.MELEE;
-        float range = 60.0f;
-        float attackSpeed = 0.4f;
-        if (MathUtils.random(100) < 40) {
-            type = Weapon.Type.RANGED;
-            range = 160.0f;
-            attackSpeed = 0.5f;
+        for (int i = 0; i < 30; i++) {
+            if (MathUtils.random(100) < 10) {
+                w.setMaxDamage(w.getMaxDamage() + 1);
+            }
         }
-        w.setup(type, "Weapon", MathUtils.random(1, 4), maxDamage, 0.4f, range);
-        w.setPosition(x, y);
+        if (w.getMinDamage() > w.getMaxDamage()) {
+            w.setMinDamage(w.getMaxDamage());
+        }
     }
 
     public void update(float dt) {
         checkPool();
+    }
+
+    public void loadPrototypes() {
+        prototypes = new ArrayList<>();
+        BufferedReader reader = null;
+        try {
+            reader = Gdx.files.internal("data/weapons.csv").reader(8192);
+            reader.readLine();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                prototypes.add(new Weapon(line));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
