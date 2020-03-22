@@ -38,6 +38,7 @@ public class Monster extends GameCharacter implements Poolable {
     public void onDeath() {
         super.onDeath();
         gc.getWeaponsController().setup(position.x, position.y);
+        gc.getUsefullThingsController().setup(position.x, position.y);
     }
 
     @Override

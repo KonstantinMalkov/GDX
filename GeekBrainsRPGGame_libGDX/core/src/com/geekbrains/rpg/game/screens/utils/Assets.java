@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.geekbrains.rpg.game.screens.ScreenManager;
 
 public class Assets {
-    private static final Assets ourInstance = new Assets();
+    private static final Assets ourInstance = new Assets(); // экземпляр
 
     public static Assets getInstance() {
         return ourInstance;
@@ -37,12 +37,13 @@ public class Assets {
         switch (type) {
             case MENU:
                 assetManager.load("images/game.pack", TextureAtlas.class);
-                createStandardFont(14);
                 createStandardFont(24);
                 createStandardFont(72);
                 break;
             case GAME:
                 assetManager.load("images/game.pack", TextureAtlas.class);
+                createStandardFont(14);
+                createStandardFont(24);
                 createStandardFont(32);
                 break;
         }
