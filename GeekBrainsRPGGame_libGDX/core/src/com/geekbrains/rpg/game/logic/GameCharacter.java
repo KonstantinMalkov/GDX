@@ -181,6 +181,10 @@ public abstract class GameCharacter implements MapElement {
         this.hp = hp;
     }
 
+    public int getHp() {
+        return hp;
+    }
+
     public int getHpMax() {
         return hpMax;
     }
