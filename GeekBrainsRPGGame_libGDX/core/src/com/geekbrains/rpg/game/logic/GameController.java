@@ -107,6 +107,13 @@ public class GameController {
             }
         }
 
+        for (int i = 0; i < usefullThingsController.getActiveList().size(); i++) {
+            UsefullThings u = usefullThingsController.getActiveList().get(i);
+            if (hero.getPosition().dst(u.getPosition()) < 40) {
+                u.consume(hero);//подобрали нужную вещь
+            }
+        }
+
         for (int i = 0; i < projectilesController.getActiveList().size(); i++) {
             Projectile p = projectilesController.getActiveList().get(i);
             if (!map.isAirPassable(p.getCellX(), p.getCellY())) {

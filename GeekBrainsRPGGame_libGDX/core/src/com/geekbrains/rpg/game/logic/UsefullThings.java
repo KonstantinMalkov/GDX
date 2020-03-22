@@ -14,6 +14,7 @@ public class UsefullThings implements MapElement, Poolable, Consumable {
     private Vector2 position;
     private TextureRegion texture;
     private boolean active;
+    private int typeThings;
 
     public UsefullThings() {
         this.position = new Vector2(0, 0);
@@ -30,20 +31,29 @@ public class UsefullThings implements MapElement, Poolable, Consumable {
     public void setup() {
         if (MathUtils.random(1,2) == 1) {
             this.texture = Assets.getInstance().getAtlas().findRegion("coin");
+            this.typeThings = 1;
         } else {
             texture = Assets.getInstance().getAtlas().findRegion("apple");
+            this.typeThings = 2;
         }
+        this.active = true;
     }
 
     @Override
     public void consume(GameCharacter gameCharacter) {
-        gameCharacter.setHp(gameCharacter.getHpMax());
-        active = true;
+        if (typeThings == 1){
+            gameCharacter.gc.getHero().addCoins(MathUtils.random(1,5));
+            active = false;
+        }
+        if (typeThings == 2) {
+            gameCharacter.setHp(gameCharacter.getHp() + MathUtils.random(1,10));
+            active = false;
+        }
     }
 
     @Override
     public void render(SpriteBatch batch, BitmapFont font) {
-        batch.draw(texture, position.x - 32*2, position.y - 32*2);
+        batch.draw(texture, position.x- 32*2, position.y- 32*2);//
     }
 
     @Override

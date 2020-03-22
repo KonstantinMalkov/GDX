@@ -44,6 +44,12 @@ public class WorldRenderer {
             Weapon w = gc.getWeaponsController().getActiveList().get(i);
             drawables[w.getCellY()].add(w);
         }
+
+        for (int i = 0; i < gc.getUsefullThingsController().getActiveList().size(); i++) {
+            UsefullThings u = gc.getUsefullThingsController().getActiveList().get(i);
+            drawables[u.getCellY()].add(u);
+        }
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
