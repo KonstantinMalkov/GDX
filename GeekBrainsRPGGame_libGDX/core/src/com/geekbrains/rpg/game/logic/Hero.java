@@ -17,6 +17,7 @@ public class Hero extends GameCharacter {
         this.dst.set(position);
         this.strBuilder = new StringBuilder();
         this.weapon = gc.getWeaponsController().getOneFromAnyPrototype();
+        this.isRed = false;
     }
 
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
@@ -47,9 +48,18 @@ public class Hero extends GameCharacter {
                     return;
                 }
             }
+            for (int i = 0; i < gc.getMonstersRedController().getActiveList().size(); i++) {
+                MonsterRed m = gc.getMonstersRedController().getActiveList().get(i);
+                if (m.getPosition().dst(gc.getMouse()) < 30.0f) {
+                    state = State.ATTACK;
+                    target = m;
+                    return;
+                }
+            }
             dst.set(gc.getMouse());
             state = State.MOVE;
             target = null;
         }
     }
+
 }

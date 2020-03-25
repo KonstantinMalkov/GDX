@@ -1,19 +1,18 @@
 package com.geekbrains.rpg.game.logic;
 
 import com.geekbrains.rpg.game.logic.utils.ObjectPool;
-import com.geekbrains.rpg.game.screens.utils.Assets;
 
-public class MonstersController extends ObjectPool<Monster> {
+public class MonstersRedController extends ObjectPool<MonsterRed> {
     private GameController gc;
     private float innerTimer;
     private float spawnPeriod;// время порождения новых монстров
 
     @Override
-    protected Monster newObject() {
-        return new Monster(gc);
+    protected MonsterRed newObject() {
+        return new MonsterRed(gc);
     }
 
-    public MonstersController(GameController gc, int initialCount) {
+    public MonstersRedController(GameController gc, int initialCount) {
         this.gc = gc;
         this.spawnPeriod = 5.0f;
         for (int i = 0; i < initialCount; i++) {

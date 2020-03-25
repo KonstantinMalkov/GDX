@@ -1,26 +1,24 @@
 package com.geekbrains.rpg.game.logic;
 
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.geekbrains.rpg.game.logic.utils.Poolable;
 import com.geekbrains.rpg.game.screens.utils.Assets;
 
-public class Monster extends GameCharacter implements Poolable {
+public class MonsterRed extends GameCharacter implements Poolable {
     @Override
     public boolean isActive() {
         return hp > 0;
     }
 
-    public Monster(GameController gc) {
+    public MonsterRed(GameController gc) {
         super(gc, 20, 80.0f);
         this.textures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("dwarf")).split(60, 60);
         this.changePosition(800.0f, 300.0f);
         this.dst.set(this.position);
         this.visionRadius = 160.0f;
         this.weapon = gc.getWeaponsController().getOneFromAnyPrototype();
-        this.isRed = false;
+        this.isRed = true;
     }
 
     public void generateMe() {
@@ -56,8 +54,8 @@ public class Monster extends GameCharacter implements Poolable {
             target = gc.getHero();
             stateTimer = 10.0f;
         } else {
-            for (int i = 0; i < gc.getMonstersRedController().getActiveList().size(); i++) {
-                MonsterRed m = gc.getMonstersRedController().getActiveList().get(i);
+            for (int i = 0; i < gc.getMonstersController().getActiveList().size(); i++) {
+                Monster m = gc.getMonstersController().getActiveList().get(i);
                 if (state != State.RETREAT && this.position.dst(m.getPosition()) < visionRadius) {
                     state = State.ATTACK;
                     target = m;
