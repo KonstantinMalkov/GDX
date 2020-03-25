@@ -12,7 +12,9 @@ public class GameController {
     private ProjectilesController projectilesController;
     private PowerUpsController powerUpsController;
     private MonstersController monstersController;
+    private MonstersRedController monstersRedController;
     private WeaponsController weaponsController;
+    private DamagesScreenController damagesScreenController;
     private SpecialEffectsController specialEffectsController;
     private List<GameCharacter> allCharacters;
     private Map map;
@@ -49,6 +51,10 @@ public class GameController {
         return monstersController;
     }
 
+    public MonstersRedController getMonstersRedController() {
+        return monstersRedController;
+    }
+
     public Map getMap() {
         return map;
     }
@@ -61,14 +67,20 @@ public class GameController {
         return weaponsController;
     }
 
+    public DamagesScreenController getDamagesScreenController() {
+        return damagesScreenController;
+    }
+
     public GameController() {
         this.allCharacters = new ArrayList<>();
         this.projectilesController = new ProjectilesController(this);
         this.weaponsController = new WeaponsController(this);
+        this.damagesScreenController = new DamagesScreenController(this);
         this.powerUpsController = new PowerUpsController(this);
         this.hero = new Hero(this);
         this.map = new Map();
         this.monstersController = new MonstersController(this, 25);
+        this.monstersRedController = new MonstersRedController(this, 25);
         this.specialEffectsController = new SpecialEffectsController();
         this.tmp = new Vector2(0, 0);
         this.tmp2 = new Vector2(0, 0);
@@ -83,12 +95,15 @@ public class GameController {
         allCharacters.clear();
         allCharacters.add(hero);
         allCharacters.addAll(monstersController.getActiveList());
+        allCharacters.addAll(monstersRedController.getActiveList());
 
         hero.update(dt);
         monstersController.update(dt);
+        monstersRedController.update(dt);
         checkCollisions();
         projectilesController.update(dt);
         weaponsController.update(dt);
+        damagesScreenController.update(dt);
         powerUpsController.update(dt);
         specialEffectsController.update(dt);
     }
@@ -117,6 +132,10 @@ public class GameController {
             Monster m = monstersController.getActiveList().get(i);
             collideUnits(hero, m);
         }
+        for (int i = 0; i < monstersRedController.getActiveList().size(); i++) {
+            MonsterRed m = monstersRedController.getActiveList().get(i);
+            collideUnits(hero, m);
+        }
         for (int i = 0; i < monstersController.getActiveList().size() - 1; i++) {
             Monster m = monstersController.getActiveList().get(i);
             for (int j = i + 1; j < monstersController.getActiveList().size(); j++) {
@@ -124,6 +143,21 @@ public class GameController {
                 collideUnits(m, m2);
             }
         }
+        for (int i = 0; i < monstersRedController.getActiveList().size() - 1; i++) {
+            MonsterRed m = monstersRedController.getActiveList().get(i);
+            for (int j = i + 1; j < monstersRedController.getActiveList().size(); j++) {
+                MonsterRed m2 = monstersRedController.getActiveList().get(j);
+                collideUnits(m, m2);
+            }
+        }
+        for (int i = 0; i < monstersController.getActiveList().size() - 1; i++) {
+            Monster m = monstersController.getActiveList().get(i);
+            for (int j = i + 1; j < monstersRedController.getActiveList().size(); j++) {
+                MonsterRed m2 = monstersRedController.getActiveList().get(j);
+                collideUnits(m, m2);
+            }
+        }
+
         for (int i = 0; i < weaponsController.getActiveList().size(); i++) {
             Weapon w = weaponsController.getActiveList().get(i);
             if (hero.getPosition().dst(w.getPosition()) < 20) {
@@ -140,6 +174,7 @@ public class GameController {
             if (p.getPosition().dst(hero.getPosition()) < 18 && p.getOwner() != hero) {
                 p.deactivate();
                 hero.takeDamage(p.getOwner(), p.getDamage());
+                damagesScreenController.setup(hero.getPosition().x, hero.getPosition().y,p.getDamage());
             }
             for (int j = 0; j < monstersController.getActiveList().size(); j++) {
                 Monster m = monstersController.getActiveList().get(j);
@@ -149,6 +184,18 @@ public class GameController {
                 if (p.getPosition().dst(m.getPosition()) < 18) {
                     p.deactivate();
                     m.takeDamage(p.getOwner(), p.getDamage());
+                    damagesScreenController.setup(m.getPosition().x, m.getPosition().y,p.getDamage());
+                }
+            }
+            for (int j = 0; j < monstersRedController.getActiveList().size(); j++) {
+                MonsterRed m = monstersRedController.getActiveList().get(j);
+                if (p.getOwner() == m) {
+                    continue;
+                }
+                if (p.getPosition().dst(m.getPosition()) < 18) {
+                    p.deactivate();
+                    m.takeDamage(p.getOwner(), p.getDamage());
+                    damagesScreenController.setup(m.getPosition().x, m.getPosition().y,p.getDamage());
                 }
             }
         }

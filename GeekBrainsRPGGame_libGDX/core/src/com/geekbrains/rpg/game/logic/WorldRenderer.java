@@ -82,6 +82,11 @@ public class WorldRenderer {
             drawables[m.getCellY()].add(m);
         }
 
+        for (int i = 0; i < gc.getMonstersRedController().getActiveList().size(); i++) {
+            MonsterRed m = gc.getMonstersRedController().getActiveList().get(i);
+            drawables[m.getCellY()].add(m);// добавляем красных монстров
+        }
+
         for (int i = 0; i < gc.getProjectilesController().getActiveList().size(); i++) {
             Projectile p = gc.getProjectilesController().getActiveList().get(i);
             drawables[p.getCellY()].add(p);
@@ -117,6 +122,7 @@ public class WorldRenderer {
             }
         }
         gc.getSpecialEffectsController().render(batch);
+        gc.getDamagesScreenController().render(batch, font14);
         batch.end();
         frameBuffer.end();
 

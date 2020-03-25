@@ -46,6 +46,8 @@ public abstract class GameCharacter implements MapElement {
     protected int hp, hpMax;
     protected int coins;
 
+    protected boolean isRed;
+
     protected Weapon weapon;
 
     public void addCoins(int amount) {
@@ -197,6 +199,8 @@ public abstract class GameCharacter implements MapElement {
             onDeath();
             return true;
         }
+        // покажем нанесенный урон
+        gc.getDamagesScreenController().setup(this.getPosition().x, attacker.getPosition().y, amount);
         return false;
     }
 
@@ -234,9 +238,17 @@ public abstract class GameCharacter implements MapElement {
                 currentRegion.flip(true, false);
             }
         }
-        batch.setColor(1.0f, 1.0f - damageTimer, 1.0f - damageTimer, 1.0f);
-        batch.draw(currentRegion, position.x - 30, position.y - 15, 30, 30, 60, 60, 1.0f, 1.0f, 0);
-        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        if (!isRed) {// не красные монстры
+            // во время ударов меняем цвет героя
+            batch.setColor(1.0f, 1.0f - damageTimer, 1.0f - damageTimer, 1.0f);
+            batch.draw(currentRegion, position.x - 30, position.y - 15, 30, 30, 60, 60, 1.0f, 1.0f, 0);
+            batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        } else {// красные монстры
+            batch.setColor(1.0f, 0.0f, 0.0f, 1.0f);
+            batch.draw(currentRegion, position.x - 30, position.y - 15, 30, 30, 60, 60, 1.0f, 1.0f, 0);
+            batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        }
 
         batch.setColor(0.2f, 0.2f, 0.2f, 1.0f);
         batch.draw(textureHp, position.x - 32, position.y + 28, 64, 14);
