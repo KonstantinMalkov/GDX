@@ -1,0 +1,7 @@
+CLASS   ,TITLE     ,HP  ,SPEED,WEAPON
+ELF     ,Dwarf     ,200 ,30   ,AXE
+UNDEAD  ,Skeleton  ,140 ,40   ,SWORD
+UNDEAD  ,Mummy     ,260 ,20   ,MACE
+ELF     ,WoodElf   ,100 ,50   ,BOW
+GOBLIN  ,Goblin    ,100 ,50   ,SWORD
+DEMON   ,Demon     ,150 ,70   ,MACE

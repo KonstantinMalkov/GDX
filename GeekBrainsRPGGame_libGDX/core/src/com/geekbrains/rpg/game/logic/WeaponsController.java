@@ -25,15 +25,20 @@ public class WeaponsController extends ObjectPool<Weapon> {
 
     public void setup(float x, float y) {
         Weapon out = getActiveElement();
+        out.setTime(0.0f);
         out.copyFrom(prototypes.get(MathUtils.random(0, prototypes.size() - 1)));
         forge(out);
         out.setPosition(x, y);
         out.activate();
     }
 
-    public Weapon getOneFromAnyPrototype() {
+    public Weapon getOneFromAnyPrototype(List<Weapon.WeaponClass> allowed) {
         Weapon out = new Weapon(gc);
-        out.copyFrom(prototypes.get(MathUtils.random(0, prototypes.size() - 1)));
+        Weapon prototype = null;
+        do {
+            prototype = prototypes.get(MathUtils.random(0,prototypes.size()-1));
+        } while (!allowed.contains(prototype.getWeaponClass()));
+        out.copyFrom(prototype);//s.get(MathUtils.random(0, prototypes.size() - 1))
         forge(out);
         return out;
     }
@@ -55,6 +60,9 @@ public class WeaponsController extends ObjectPool<Weapon> {
     }
 
     public void update(float dt) {
+        for (int i = 0; i < getActiveList().size(); i++) {
+            getActiveList().get(i).update(dt);
+        }
         checkPool();
     }
 
@@ -66,7 +74,7 @@ public class WeaponsController extends ObjectPool<Weapon> {
             reader.readLine();
             String line = null;
             while ((line = reader.readLine()) != null) {
-                prototypes.add(new Weapon(line));
+                prototypes.add(new Weapon(this.gc, line));
             }
         } catch (IOException e) {
             e.printStackTrace();

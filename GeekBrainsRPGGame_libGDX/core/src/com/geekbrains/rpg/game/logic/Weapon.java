@@ -11,9 +11,9 @@ import com.geekbrains.rpg.game.logic.utils.Poolable;
 import com.geekbrains.rpg.game.screens.utils.Assets;
 
 public class Weapon implements MapElement, Poolable, Consumable {
+
     public enum WeaponClass {
         SWORD, SPEAR, AXE, MACE, BOW, CROSSBOW;
-
         public static WeaponClass fromString(String in) {
             switch (in) {
                 case "SWORD":
@@ -60,6 +60,7 @@ public class Weapon implements MapElement, Poolable, Consumable {
     private float speed;
     private float range;
     private boolean active;
+    private float time;
 
     public void setMinDamage(int minDamage) {
         this.minDamage = minDamage;
@@ -131,8 +132,16 @@ public class Weapon implements MapElement, Poolable, Consumable {
         return maxDamage;
     }
 
-    public int generateDamage() {
-        return MathUtils.random(minDamage, maxDamage);
+    public void setTime(float time) {
+        this.time = time;
+    }
+
+    public int generateDamage(int plusToDamage) {
+        float plusToDamage2 =plusToDamage;
+        float maxDamage2 = maxDamage;
+        maxDamage2 = (maxDamage2 / 100 * plusToDamage2);
+        plusToDamage = Math.round(maxDamage2);
+        return MathUtils.random((minDamage + plusToDamage), (maxDamage + plusToDamage));
     }
 
     public float getSpeed() {
@@ -152,8 +161,13 @@ public class Weapon implements MapElement, Poolable, Consumable {
         this.position = new Vector2(0, 0);
     }
 
+    public WeaponClass getWeaponClass() {
+        return weaponClass;
+    }
+
     // CLASS ,TYPE  ,TITLE ,MIN_DAMAGE, MAX_DAMAGE, SPEED, RANGE
-    public Weapon(String line) {
+    public Weapon(GameController gc, String line) {
+        this.gc = gc;
         String[] tokens = line.split(",");
         this.weaponClass = WeaponClass.fromString(tokens[0].trim());
         this.type = Type.fromString(tokens[1].trim());
@@ -170,8 +184,6 @@ public class Weapon implements MapElement, Poolable, Consumable {
     }
 
     public void copyFrom(Weapon from) {
-        // если оружие более мощное, то тогда меняю его
-        if (this.maxDamage < from.maxDamage) {
             this.type = from.type;
             this.weaponClass = from.weaponClass;
             this.title = from.title;
@@ -180,12 +192,13 @@ public class Weapon implements MapElement, Poolable, Consumable {
             this.minDamage = from.minDamage;
             this.speed = from.speed;
             this.texture = from.texture;
-        } else {
-            // в любом случае, если подбирает любое оружие, то + к урону
-            this.maxDamage += 1;
-            this.minDamage += 1;
-        }
+    }
 
+    public void update(float dt) {
+        time += dt;
+        if (time > 10.0f) {
+            active = false;
+        }
     }
 
     @Override

@@ -88,11 +88,22 @@ public class WorldRenderer {
         }
         for (int i = 0; i < gc.getWeaponsController().getActiveList().size(); i++) {
             Weapon w = gc.getWeaponsController().getActiveList().get(i);
-            drawables[w.getCellY()].add(w);
+            try {
+                drawables[w.getCellY()].add(w);
+            } catch (Exception e){
+                System.out.println(e);
+            }
         }
         for (int i = 0; i < gc.getPowerUpsController().getActiveList().size(); i++) {
-            PowerUp p = gc.getPowerUpsController().getActiveList().get(i);
-            drawables[p.getCellY()].add(p);
+            if (i <= gc.getPowerUpsController().getActiveList().size()) {
+                PowerUp p = gc.getPowerUpsController().getActiveList().get(i);
+                try {
+                    drawables[p.getCellY()].add(p);
+                } catch (Exception e){
+                    System.out.println(e);
+                }
+
+            }
         }
         for (int i = 0; i < drawables.length; i++) {
             Collections.sort(drawables[i], yComparator);
@@ -117,6 +128,7 @@ public class WorldRenderer {
             }
         }
         gc.getSpecialEffectsController().render(batch);
+        gc.getInfoController().render(batch, font14);
         batch.end();
         frameBuffer.end();
 

@@ -11,19 +11,23 @@ public class Hero extends GameCharacter {
     private StringBuilder strBuilder;
 
     public Hero(GameController gc) {
-        super(gc, 500, 220.0f);
+        super(gc, 500, 180.0f);
+        this.charType = CharType.HUMAN;
+        //this.monsterClass = null;
         this.textures = new TextureRegion(Assets.getInstance().getAtlas().findRegion("knight")).split(60, 60);
         this.changePosition(100.0f, 100.0f);
         this.dst.set(position);
         this.strBuilder = new StringBuilder();
-        this.weapon = gc.getWeaponsController().getOneFromAnyPrototype();
+        this.allowedWeaponTypes.add(Weapon.WeaponClass.SWORD);
+        this.allowedWeaponTypes.add(Weapon.WeaponClass.BOW);
+        this.weapon = gc.getWeaponsController().getOneFromAnyPrototype(allowedWeaponTypes);
     }
 
     public void renderGUI(SpriteBatch batch, BitmapFont font) {
         strBuilder.setLength(0);
         strBuilder.append("Class: ").append("Knight").append("\n");
         strBuilder.append("HP: ").append(hp).append(" / ").append(hpMax).append("\n");
-        strBuilder.append("Coins: ").append(coins).append("\n");
+        strBuilder.append("Coins: ").append(coins).append("; experience: ").append(this.countExperience).append(" (").append(this.gc.getPlusToDamageFromExperience(this.countExperience)).append(")").append("\n");
         strBuilder.append("Weapon: ").append(weapon.getTitle()).append(" [").append(weapon.getMinDamage()).append("-").append(weapon.getMaxDamage()).append("]\n");
         font.draw(batch, strBuilder, 10, 710);
     }
@@ -32,6 +36,7 @@ public class Hero extends GameCharacter {
     public void onDeath() {
         super.onDeath();
         coins = 0;
+        countExperience = 0;
         hp = hpMax;
     }
 

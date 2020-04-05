@@ -23,6 +23,7 @@ public class Map {
 
     public static final int MAP_CELLS_WIDTH = 24*2;
     public static final int MAP_CELLS_HEIGHT = 16*2;
+    public static final int OBSTACLES_COUNT = 100;
 
     public static final int CELL_WIDTH = 80;
     public static final int CELL_HEIGHT = 60;
@@ -44,7 +45,12 @@ public class Map {
     }
 
     public boolean isGroundPassable(int cellX, int cellY) {
-        return data[cellX][cellY] == null;
+        try {
+            return data[cellX][cellY] == null;
+        } catch (Exception e){
+            System.out.println(e);
+            return false;
+        }
     }
 
     public boolean isGroundPassable(Vector2 position) {
@@ -53,7 +59,7 @@ public class Map {
 
     public Map() {
         this.data = new Obstacle[MAP_CELLS_WIDTH][MAP_CELLS_HEIGHT];
-        for (int i = 0; i < 35*2; i++) {
+        for (int i = 0; i < OBSTACLES_COUNT; i++) {
             int x = MathUtils.random(MAP_CELLS_WIDTH - 1);
             int y = MathUtils.random(MAP_CELLS_HEIGHT - 1);
             data[x][y] = new Obstacle();

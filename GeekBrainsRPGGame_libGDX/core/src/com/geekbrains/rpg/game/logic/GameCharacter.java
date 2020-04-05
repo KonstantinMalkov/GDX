@@ -1,5 +1,6 @@
 package com.geekbrains.rpg.game.logic;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,6 +9,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.geekbrains.rpg.game.logic.utils.MapElement;
 import com.geekbrains.rpg.game.screens.utils.Assets;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GameCharacter implements MapElement {
     public enum State {
@@ -47,6 +51,37 @@ public abstract class GameCharacter implements MapElement {
     protected int coins;
 
     protected Weapon weapon;
+    protected CharType charType;
+
+    protected int countExperience;
+
+    protected List<Weapon.WeaponClass> allowedWeaponTypes;
+
+    public enum CharType{
+        HUMAN,UNDEAD,GOBLIN,DEMON,ELF;
+
+        public static CharType fromString(String in) {
+            switch (in) {
+                case "HUMAN":
+                    return HUMAN;
+                case "UNDEAD":
+                    return UNDEAD;
+                case "GOBLIN":
+                    return GOBLIN;
+                case "DEMON":
+                    return DEMON;
+                case "ELF":
+                    return ELF;
+                default:
+                    throw new RuntimeException("Unknown monster class");
+            }
+        }
+
+    }
+
+    public CharType getCharType() {
+        return charType;
+    }
 
     public void addCoins(int amount) {
         coins += amount;
@@ -69,12 +104,13 @@ public abstract class GameCharacter implements MapElement {
         return weapon;
     }
 
-    public void restoreHp(float percent) {
+    public int restoreHp(float percent) {
         int amount = (int) (hpMax * percent);
-        hp += amount;
-        if (hp > hpMax) {
-            hp = hpMax;
+        if ((hp + amount) > hpMax) {
+            amount = hpMax - hp;
         }
+        hp += amount;
+        return amount;
     }
 
     public void changePosition(float x, float y) {
@@ -125,6 +161,8 @@ public abstract class GameCharacter implements MapElement {
         this.stateTimer = 1.0f;
         this.timePerFrame = 0.2f;
         this.target = null;
+        this.allowedWeaponTypes = new ArrayList();
+        this.countExperience = 0;
     }
 
     public int getCurrentFrameIndex() {
@@ -155,10 +193,12 @@ public abstract class GameCharacter implements MapElement {
                 if (weapon.getType() == Weapon.Type.MELEE) {
                     tmp.set(target.position).sub(position);
                     gc.getSpecialEffectsController().setupSwordSwing(position.x, position.y, tmp.angle());
-                    target.takeDamage(this, weapon.generateDamage());
+                    int plusToDamage = this.gc.getPlusToDamageFromExperience(this.countExperience);
+                    target.takeDamage(this, weapon.generateDamage(plusToDamage));
                 }
                 if (weapon.getType() == Weapon.Type.RANGED && target != null) {
-                    gc.getProjectilesController().setup(this, position.x, position.y, target.getPosition().x, target.getPosition().y, weapon.generateDamage());
+                    int plusToDamage = this.gc.getPlusToDamageFromExperience(this.countExperience);
+                    gc.getProjectilesController().setup(this, position.x, position.y, target.getPosition().x, target.getPosition().y, weapon.generateDamage(plusToDamage));
                 }
             }
         }
@@ -196,7 +236,18 @@ public abstract class GameCharacter implements MapElement {
         if (hp <= 0) {
             onDeath();
             return true;
+        } else {
+            // если персонажа атакуют и он не находиться в состоянии
+            // атаки другого персонажа, то нужно защищаться
+            if (this.state != State.ATTACK && this.charType != CharType.HUMAN){
+                state = State.ATTACK;
+                target = lastAttacker;
+                stateTimer = 10.0f;
+            }
         }
+        gc.getInfoController().setupAnyAmount(position.x, position.y,
+                this.charType != CharType.HUMAN ? Color.ORANGE : Color.RED,
+                "-", amount);
         return false;
     }
 
@@ -218,6 +269,11 @@ public abstract class GameCharacter implements MapElement {
             GameCharacter gameCharacter = gc.getAllCharacters().get(i);
             if (gameCharacter.target == this) {
                 gameCharacter.resetAttackState();
+                if (this.countExperience == 0) {
+                    gameCharacter.countExperience = gameCharacter.countExperience + 1;
+                } else {
+                    gameCharacter.countExperience = gameCharacter.countExperience + this.countExperience;
+                }
             }
         }
     }
@@ -234,17 +290,20 @@ public abstract class GameCharacter implements MapElement {
                 currentRegion.flip(true, false);
             }
         }
+        // отрисовка героя
         batch.setColor(1.0f, 1.0f - damageTimer, 1.0f - damageTimer, 1.0f);
         batch.draw(currentRegion, position.x - 30, position.y - 15, 30, 30, 60, 60, 1.0f, 1.0f, 0);
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         batch.setColor(0.2f, 0.2f, 0.2f, 1.0f);
-        batch.draw(textureHp, position.x - 32, position.y + 28, 64, 14);
+        batch.draw(textureHp, position.x - 32, position.y + 48, 64, 14);
+        batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         float n = (float) hp / hpMax;
         float shock = damageTimer * 5.0f;
-        batch.setColor(1.0f - n, n, 0.0f, 1.0f);
-        batch.draw(textureHp, position.x - 30 + MathUtils.random(-shock, shock), position.y + 30 + MathUtils.random(-shock, shock), 60 * ((float) hp / hpMax), 10);
+        batch.setColor(1.0f - n, n, 0.0f, 1.0f); // 1.0f - n, n, 0.0f, 1.0f
+        //batch.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+        batch.draw(textureHp, position.x - 32 + MathUtils.random(-shock, shock), position.y + 48 + MathUtils.random(-shock, shock), 60 * ((float) hp / hpMax), 10);
         batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        font.draw(batch, String.valueOf(hp), position.x - 30 + MathUtils.random(-shock, shock), position.y + 42 + MathUtils.random(-shock, shock), 60, 1, false);
+        font.draw(batch, String.valueOf(hp+"/"+ countExperience), position.x - 30 + MathUtils.random(-shock, shock), position.y + 60 + MathUtils.random(-shock, shock), 60, 1, false);
     }
 }

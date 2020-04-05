@@ -1,5 +1,6 @@
 package com.geekbrains.rpg.game.logic;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -44,10 +45,13 @@ public class PowerUp implements Consumable, Poolable, MapElement {
         active = false;
         switch (type) {
             case MEDKIT:
-                gameCharacter.restoreHp(0.1f);
+                int restored = gameCharacter.restoreHp(0.1f);
+                gc.getInfoController().setupAnyAmount(gameCharacter.getPosition().x, gameCharacter.getPosition().y, Color.GREEN, "+", restored);
                 break;
             case COINS:
-                gameCharacter.addCoins(MathUtils.random(3, 10));
+                int amount = MathUtils.random(3, 10);
+                gameCharacter.addCoins(amount);
+                gc.getInfoController().setupAnyAmount(gameCharacter.getPosition().x, gameCharacter.getPosition().y, Color.YELLOW, "+", amount);
                 break;
         }
     }

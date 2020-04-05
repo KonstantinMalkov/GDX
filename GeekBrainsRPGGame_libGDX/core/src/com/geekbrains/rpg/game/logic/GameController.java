@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.geekbrains.rpg.game.screens.ScreenManager;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +16,26 @@ public class GameController {
     private MonstersController monstersController;
     private WeaponsController weaponsController;
     private SpecialEffectsController specialEffectsController;
-    private List<GameCharacter> allCharacters;
+    private InfoController infoController;
+    private ArrayList<GameCharacter> allCharacters;
     private Map map;
     private Hero hero;
     private Vector2 tmp, tmp2;
     private Vector2 mouse;
     private float worldTimer;
+    private ArrayList<ArrayList<Integer>> arrExperience;
+
+    public int getPlusToDamageFromExperience(int countExperience) {
+        int plusToDamage = 0;
+        for (Object obj : arrExperience) {
+            if (countExperience >= (Integer)((ArrayList) obj).get(0)){
+                plusToDamage = (int)((ArrayList) obj).get(1);
+            } else {
+                break;
+            }
+        }
+        return plusToDamage;
+    }
 
     public Vector2 getMouse() {
         return mouse;
@@ -31,6 +47,10 @@ public class GameController {
 
     public SpecialEffectsController getSpecialEffectsController() {
         return specialEffectsController;
+    }
+
+    public InfoController getInfoController() {
+        return infoController;
     }
 
     public PowerUpsController getPowerUpsController() {
@@ -68,11 +88,13 @@ public class GameController {
         this.powerUpsController = new PowerUpsController(this);
         this.hero = new Hero(this);
         this.map = new Map();
-        this.monstersController = new MonstersController(this, 25);
+        this.monstersController = new MonstersController(this, 35);
         this.specialEffectsController = new SpecialEffectsController();
+        this.infoController = new InfoController();
         this.tmp = new Vector2(0, 0);
         this.tmp2 = new Vector2(0, 0);
         this.mouse = new Vector2(0, 0);
+        loadExperienceScale();
     }
 
     public void update(float dt) {
@@ -91,6 +113,7 @@ public class GameController {
         weaponsController.update(dt);
         powerUpsController.update(dt);
         specialEffectsController.update(dt);
+        infoController.update(dt);
     }
 
     public void collideUnits(GameCharacter u1, GameCharacter u2) {
@@ -160,4 +183,52 @@ public class GameController {
             }
         }
     }
+
+    public void loadExperienceScale(){
+
+        this.arrExperience = new ArrayList();
+
+        BufferedReader reader = null;
+        try {
+            reader = Gdx.files.internal("data/experienceScale.csv").reader(8192);
+            String line = null;
+            // считываем и пропускаем первую строку
+            line = reader.readLine();
+            while ((line = reader.readLine()) != null){
+                // разделим строку (50 (опыт), 15 (процент)) по запятым
+                String[] strExperience = line.split(",");
+                ArrayList<Integer> arr = new ArrayList();
+
+                try {
+                    Integer i1 = Integer.valueOf(strExperience[0].trim());
+                    arr.add(i1);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    System.out.println("NumberFormatException: " + nfe.getMessage());
+                }
+
+                try {
+                    Integer i2 = Integer.valueOf(strExperience[1].trim());
+                    arr.add(i2);
+                }
+                catch (NumberFormatException nfe)
+                {
+                    System.out.println("NumberFormatException: " + nfe.getMessage());
+                }
+                if (arr.size() == 2){
+                    this.arrExperience.add(arr);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
